@@ -10,20 +10,19 @@ The architecture is built on some of the most popular open source projects today
 | Grafana Loki and Promtail | [2.4.2](https://github.com/grafana/loki/releases) |
 | Grafana | [8.3.3](https://grafana.com/grafana/download) |
 
-- [Step 1: Prepare the workspace directory](#step-1-prepare-the-workspace-directory)
-- [Step 2: Create node configuration files](#step-2-create-node-configuration-files)
-- [Step 3: Run the Corda Network Bootstrapper](#step-3-run-the-corda-network-bootstrapper)
-- [Step 4: Preparing for Docker](#step-4-preparing-for-docker)
-- [Step 5: Create the Prometheus configuration files](#step-5-create-the-prometheus-configuration-files)
-- [Step 6: Create the Docker-Compose file](#step-6-create-the-docker-compose-file)
-- [Step 7: Setup Grafana](#step-7-setup-grafana)
-- [Step 8: Explore Grafana](#step-8-explore-grafana)
-- [Step 9: Run some Corda Finance flows](#step-9-run-some-corda-finance-flows)
+- [Step 01: Prepare the workspace directory](#step-1-prepare-the-workspace-directory)
+- [Step 02: Create node configuration files](#step-2-create-node-configuration-files)
+- [Step 03: Run the Corda Network Bootstrapper](#step-3-run-the-corda-network-bootstrapper)
+- [Step 04: Preparing for Docker](#step-4-preparing-for-docker)
+- [Step 05: Create the Prometheus configuration files](#step-5-create-the-prometheus-configuration-files)
+- [Step 06: Create the Docker-Compose file](#step-6-create-the-docker-compose-file)
+- [Step 07: Add Trace components](#step-7-add-trace-components)
+- [Step 08: Setup Grafana](#step-8-setup-grafana)
+- [Step 09: Explore Grafana](#step-9-explore-grafana)
+- [Step 10: Run some Corda Finance flows](#step-10-run-some-corda-finance-flows)
 - [Common issues](#common-issues)
   - [Docker Desktop OOM](#docker-desktop-oom)
 - [Attribution](#attribution)
-
-![Deployment Stack](/resources/corda-monitoring-stack.png)
 
 ## Step 1: Prepare the workspace directory
 
@@ -222,7 +221,7 @@ We define the JMX exporter targets (endpoints) for each node.  They are all usin
 
 ## Step 6: Create the Docker-Compose file
 
-Finally, we need a `docker-compose.yml` file which allows us to bring up all the services in just one command.
+We need a `docker-compose.yml` file which allows us to bring up all the services in just one command.
 
 Execute the **`06_create-docker-compose-file.sh`** shell script:
 
@@ -277,6 +276,12 @@ You can find the `docker-compose.yml` file in `./mynetwork/docker-compose.yml`. 
     command: -config.file=/etc/promtail/config.yml
   
 ```
+The stack you have configured so far looks like this:
+![Deployment Stack](/assets/corda-monitoring-stack.png)
+
+At this point, you have two options:
+* Complete this step to instantiate your stack and then start [setting up your Grafana dashboard](#step-8-setup-grafana).  -OR-
+* Jump to the next step (i.e. NOT completing this step) to [add trace components to your stack](#step-7-add-trace-components).
 
 Start up the services using the following command:
 
@@ -312,20 +317,28 @@ dc43c05edd0e   grafana/grafana:latest                   "/run.sh"               
 4615072d52fd   grafana/promtail:2.4.2                   "/usr/bin/promtail -…"   About a minute ago   Up About a minute                                                                            promtail
 ```
 
-## Step 7: Setup Grafana
+## Step 7: Add Trace Components
+
+Execute the **`07_add-trace.sh`** shell script:
+
+```bash
+➜ ./07_add-trace.sh
+```
+
+## Step 8: Setup Grafana
 
 On your browser, go to [http://localhost:3000](http://localhost:3000).
 
-![Grafana homepage](resources/grafana-homepage.png)
+![Grafana homepage](/assets/grafana-homepage.png)
 
-## Step 7.1: Add Prometheus Data Source
+## Step 8.1: Add Prometheus Data Source
 Click on `Add data source`.
 
 Select the `Prometheus` data source under `Time series databases`.
 
 Under `HTTP`, set the `URL` to `http://prometheus:9090`.  You can use the Prometheus Docker container hostname here as all of the containers run on the same Docker bridge network, so no explicit container IP addresses need to be used for connectivity.
 
-![Grafana Prometheus data source](resources/grafana-prometheus-datasource.png)
+![Grafana Prometheus data source](/assets/grafana-prometheus-datasource.png)
 
 At the bottom of the page, click on `Save & Test`.  You should see a green alert - `Data source is working`.
 
@@ -337,22 +350,22 @@ On the following screen, click `Import`.
 
 Boom, a dashboard appears!
 
-![Grafana Corda dashboard](resources/grafana-corda-dashboard.png)
+![Grafana Corda dashboard](/assets/grafana-corda-dashboard.png)
 
-## Step 7.2: Add Loki Data Source
+## Step 8.2: Add Loki Data Source
 Add the Loki data source under Logging & document databases.
-![Grafana Loki Data Source](resources/grafana-loki-datasource.png)
+![Grafana Loki Data Source](/assets/grafana-loki-datasource.png)
 
 Under `HTTP`, set the `URL` to `http://loki:3100`.
 At the bottom of the page, click on Save & Test. You should see a green alert - `Data source is working`.
 
-## Step 8: Explore Grafana
+## Step 9: Explore Grafana
 
 Go back to your [Grafana dashboard](http://localhost:3000).  In the Grafana side pane, click on `Explore`.
 At the top you will see a dropdown with data sources you can select — select the `Loki` data source.
 Click `Split` on the top right menu pane.
 
-## Step 9: Run some Corda Finance flows
+## Step 10: Run some Corda Finance flows
 
 SSH into the PartyA node Crash shell:
 
@@ -402,7 +415,7 @@ Mon Jun 15 07:53:52 GMT 2020>>> flow start CashIssueAndPaymentFlow amount: 1000 
 Flow completed with result: Result(stx=SignedTransaction(id=FB08662B2E0A19ECF9B0E3E44D2DF25934F9576DBF262D794EE2C795C3269503), recipient=O=PartyB, L=London, C=GB)
 ```
 
-![Grafana Corda dashboard after transaction](resources/grafana-corda-dashboard-tx.png)
+![Grafana Corda dashboard after transaction](/assets/grafana-corda-dashboard-tx.png)
 
 ## Common issues
 
