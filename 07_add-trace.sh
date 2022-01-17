@@ -15,6 +15,45 @@ printf "Download OpenTelemetry Instrumentation for Java driver\n"
 printf "*********************************************************************************\n"
 wget -N --https-only --progress=bar -N --continue -P ./mynetwork/shared/drivers https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.10.0/opentelemetry-javaagent.jar
 
+# Create Log4j Logging configuration
+printf "*********************************************************************************\n"
+printf "Create Log4j Logging configuration\n"
+printf "*********************************************************************************\n"
+
+install -m 644 /dev/null ./mynetwork/shared/logging.xml
+cat <<EOF >./mynetwork/shared/logging.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="ConsoleJSONAppender" target="SYSTEM_OUT">
+          <JsonLayout complete="false" compact="true"/>
+        </Console>
+        <File name="FileJSONAppender" fileName="logs/node.json">
+          <JsonLayout complete="false" compact="true" properties="true" eventEol="true"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Logger name="net.corda" level="info" additivity="false">
+            <AppenderRef ref="FileJSONAppender"/>
+        </Logger>
+        <Logger name="com.r3.corda" level="info" additivity="false">
+            <AppenderRef ref="FileJSONAppender"/>
+        </Logger>
+        <Logger name="org.hibernate" level="info" additivity="false">
+            <AppenderRef ref="FileJSONAppender"/>
+        </Logger>
+        <Logger name="org.postgresql" level="info" additivity="false">
+            <AppenderRef ref="FileJSONAppender"/>
+        </Logger>
+        <Root level="error">
+            <AppenderRef ref="FileJSONAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
+EOF
+
+printf "Created in: ./mynetwork/shared/logging.xml\n\n"
+
 # Create the OpenTelemetry Collector configuration
 printf "*********************************************************************************\n"
 printf "Create the OpenTelemetry Collector configuration\n"
@@ -30,6 +69,18 @@ receivers:
     protocols:
       grpc:
       http:
+  filelog/node1:
+    include: [ /var/bootstrap/partya/logs/*.json ]
+    attributes:
+      "host.name": partya
+  filelog/node2:
+    include: [ /var/bootstrap/partyb/logs/*.json ]
+    attributes:
+      "host.name": partyb
+  filelog/notary:
+    include: [ /var/bootstrap/notary/logs/*.json ]
+    attributes:
+      "host.name": notary
 
 processors:
  batch:
@@ -141,10 +192,13 @@ services:
   otelcollector:
     hostname: otelcollector
     container_name: otelcollector
-    image: otel/opentelemetry-collector:0.42.0
+    image: otel/opentelemetry-collector-contrib:0.42.0
     command: ["--config=/etc/otel-collector.yaml"]
     volumes:
       - ./otelcollector/otel-collector.yaml:/etc/otel-collector.yaml
+      - ./partya:/var/bootstrap/partya
+      - ./partyb:/var/bootstrap/partyb
+      - ./notary:/var/bootstrap/notary
     ports:
       - "4317:4317"      # OLTP/gRPC
       - "4318:4318"      # OLTP/HTTP
@@ -201,7 +255,7 @@ services:
       service: loki
     environment:
       - JAEGER_AGENT_HOST=tempo
-      - JAEGER_ENDPOINT=http://tempo:14268/api/traces # send traces to Tempo
+      - JAEGER_ENDPOINT=http://tempo:14268/api/traces      # send traces to Tempo
       - JAEGER_SAMPLER_TYPE=const
       - JAEGER_SAMPLER_PARAM=1
 
@@ -209,37 +263,52 @@ services:
     extends:
       file: docker-compose.yml
       service: notary
+    command: bash -c "java -Dlog4j.configurationFile=/opt/corda/logging.xml -jar /opt/corda/bin/corda.jar run-migration-scripts -f /etc/corda/node.conf --core-schemas --app-schemas --allow-hibernate-to-manage-app-schema && /opt/corda/bin/run-corda"
+    volumes:
+      - ./shared/logging.xml:/opt/corda/logging.xml:ro
     environment:
-#     - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -Dcapsule.jvm.args="-javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar""
-      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
+      ## Notice use of JVM_ARGS in https://github.com/corda/corda/blob/release/os/4.9/docker/src/bash/run-corda.sh
+      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -Dlog4j.configurationFile=/opt/corda/logging.xml -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
+#      - "CORDA_ARGS=\"--logging-level=INFO\""
       - OTEL_SERVICE_NAME=corda-partya
+      - OTEL_EXPORTER=otlp_span                            # TODO confirm valid env var
       - OTEL_TRACES_EXPORTER=jaeger                        # default is oltp
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=tempo:14250          # may not need protocol in front
-      - "OTEL_RESOURCE_ATTRIBUTES=host.hostname=partya"
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://tempo:14250
+      - "OTEL_RESOURCE_ATTRIBUTES=\"host.hostname=partya\""
 
   partya:
     extends:
       file: docker-compose.yml
       service: partya
+    command: bash -c "java -Dlog4j.configurationFile=/opt/corda/logging.xml -jar /opt/corda/bin/corda.jar run-migration-scripts -f /etc/corda/node.conf --core-schemas --app-schemas --allow-hibernate-to-manage-app-schema && /opt/corda/bin/run-corda"
+    volumes:
+      - ./shared/logging.xml:/opt/corda/logging.xml:ro
     environment:
-#     - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -Dcapsule.jvm.args="-javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar""
-      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
+      ## Notice use of JVM_ARGS in https://github.com/corda/corda/blob/release/os/4.9/docker/src/bash/run-corda.sh
+      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -Dlog4j.configurationFile=/opt/corda/logging.xml -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
+#      - "CORDA_ARGS=\"--logging-level=INFO\""
       - OTEL_SERVICE_NAME=corda-partya
+      - OTEL_EXPORTER=otlp_span                            # TODO confirm valid env var
       - OTEL_TRACES_EXPORTER=jaeger                        # default is oltp
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=tempo:14250
-      - "OTEL_RESOURCE_ATTRIBUTES=host.hostname=partya"
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://tempo:14250
+      - "OTEL_RESOURCE_ATTRIBUTES=\"host.hostname=partya\""
 
   partyb:
     extends:
       file: docker-compose.yml
       service: partyb
+    command: bash -c "java -Dlog4j.configurationFile=/opt/corda/logging.xml -jar /opt/corda/bin/corda.jar run-migration-scripts -f /etc/corda/node.conf --core-schemas --app-schemas --allow-hibernate-to-manage-app-schema && /opt/corda/bin/run-corda"
+    volumes:
+      - ./shared/logging.xml:/opt/corda/logging.xml:ro
     environment:
-#      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -Dcapsule.jvm.args="-javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar""
-      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
+      ## Notice use of JVM_ARGS in https://github.com/corda/corda/blob/release/os/4.9/docker/src/bash/run-corda.sh
+      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -Dlog4j.configurationFile=/opt/corda/logging.xml -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
+#      - "CORDA_ARGS=\"--logging-level=INFO\""
       - OTEL_SERVICE_NAME=corda-partyb
+      - OTEL_EXPORTER=otlp_span                            # TODO confirm valid env var
       - OTEL_TRACES_EXPORTER=jaeger                        # default is oltp
-      - OTEL_EXPORTER_JAEGER_ENDPOINT=tempo:14250
-      - "OTEL_RESOURCE_ATTRIBUTES=host.hostname=partyb"
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://tempo:14250
+      - "OTEL_RESOURCE_ATTRIBUTES=\"host.hostname=partyb\""
 EOF
 
 printf "Created in: ./mynetwork/docker-compose.trace.yml\n"

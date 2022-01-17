@@ -280,7 +280,8 @@ The stack you have configured so far looks like this:
 ![Deployment Stack](/assets/corda-monitoring-stack.png)
 
 At this point, you have two options:
-* Complete this step to instantiate your stack and then start [setting up your Grafana dashboard](#step-8-setup-grafana).  -OR-
+* Complete the rest of this step to instantiate your stack and then start [setting up your Grafana dashboard](#step-8-setup-grafana).  
+    -OR-
 * Jump to the next step (i.e. NOT completing this step) to [add trace components to your stack](#step-7-add-trace-components).
 
 Start up the services using the following command:
@@ -288,6 +289,7 @@ Start up the services using the following command:
 ```bash
 ➜ docker compose -f ./mynetwork/docker-compose.yml up -d
 [+] Running 10/10
+ ⠿ Network mynetwork_default  Created
  ⠿ Container prometheus  Started                12.5s
  ⠿ Container notarydb    Started                12.2s
  ⠿ Container grafana     Started                12.4s
@@ -325,6 +327,28 @@ Execute the **`07_add-trace.sh`** shell script:
 ➜ ./07_add-trace.sh
 ```
 
+Start up the services using the following command:
+```bash
+docker compose -f mynetwork/docker-compose.yml -f mynetwork/docker-compose.trace.yml up -d
+```
+
+```bash
+➜ docker compose -f mynetwork/docker-compose.yml -f mynetwork/docker-compose.trace.yml up -d
+[+] Running 13/13
+ ⠿ Network mynetwork_default  Created
+ ⠿ Container prometheus    Started                12.5s
+ ⠿ Container notarydb      Started                12.2s
+ ⠿ Container grafana       Started                12.4s
+ ⠿ Container otelcollector Started                12.1s
+ ⠿ Container tempo         Started                12.3s
+ ⠿ Container promtail      Started                12.5s
+ ⠿ Container partybdb      Started                12.2s
+ ⠿ Container partyadb      Started                12.2s
+ ⠿ Container loki          Started                12.4s
+ ⠿ Container partya        Started                12.9s
+ ⠿ Container notary        Started                12.6s
+ ⠿ Container partyb        Started                12.6s
+```
 ## Step 8: Setup Grafana
 
 On your browser, go to [http://localhost:3000](http://localhost:3000).
