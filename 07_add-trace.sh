@@ -28,7 +28,7 @@ cat <<EOF >./mynetwork/shared/logging.xml
         <Console name="ConsoleJSONAppender" target="SYSTEM_OUT">
           <JsonLayout complete="false" compact="true"/>
         </Console>
-        <File name="FileJSONAppender" fileName="logs/node.json">
+        <File name="FileJSONAppender" fileName="logs/node-\${env:NODE_NAME}_json.log">
           <JsonLayout complete="false" compact="true" properties="true" eventEol="true"/>
         </File>
     </Appenders>
@@ -70,15 +70,15 @@ receivers:
       grpc:
       http:
   filelog/node1:
-    include: [ /var/bootstrap/partya/logs/*.json ]
+    include: [ /var/bootstrap/partya/logs/node-partya_json.log ]
     attributes:
       "host.name": partya
   filelog/node2:
-    include: [ /var/bootstrap/partyb/logs/*.json ]
+    include: [ /var/bootstrap/partyb/logs/node-partyb_json.log ]
     attributes:
       "host.name": partyb
   filelog/notary:
-    include: [ /var/bootstrap/notary/logs/*.json ]
+    include: [ /var/bootstrap/notary/logs/node-notary_json.log ]
     attributes:
       "host.name": notary
 
@@ -270,11 +270,12 @@ services:
       ## Notice use of JVM_ARGS in https://github.com/corda/corda/blob/release/os/4.9/docker/src/bash/run-corda.sh
       - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -Dlog4j.configurationFile=/opt/corda/logging.xml -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
 #      - "CORDA_ARGS=\"--logging-level=INFO\""
-      - OTEL_SERVICE_NAME=corda-partya
+      - NODE_NAME=notary
+      - OTEL_SERVICE_NAME=corda-notary
       - OTEL_EXPORTER=otlp_span                            # TODO confirm valid env var
       - OTEL_TRACES_EXPORTER=jaeger                        # default is oltp
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://tempo:14250
-      - "OTEL_RESOURCE_ATTRIBUTES=\"host.hostname=partya\""
+      - "OTEL_RESOURCE_ATTRIBUTES=\"host.hostname=notary\""
 
   partya:
     extends:
@@ -287,6 +288,7 @@ services:
       ## Notice use of JVM_ARGS in https://github.com/corda/corda/blob/release/os/4.9/docker/src/bash/run-corda.sh
       - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -Dlog4j.configurationFile=/opt/corda/logging.xml -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
 #      - "CORDA_ARGS=\"--logging-level=INFO\""
+      - NODE_NAME=partya
       - OTEL_SERVICE_NAME=corda-partya
       - OTEL_EXPORTER=otlp_span                            # TODO confirm valid env var
       - OTEL_TRACES_EXPORTER=jaeger                        # default is oltp
@@ -304,6 +306,7 @@ services:
       ## Notice use of JVM_ARGS in https://github.com/corda/corda/blob/release/os/4.9/docker/src/bash/run-corda.sh
       - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -Dlog4j.configurationFile=/opt/corda/logging.xml -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml -javaagent:/opt/corda/drivers/opentelemetry-javaagent.jar"
 #      - "CORDA_ARGS=\"--logging-level=INFO\""
+      - NODE_NAME=partyb
       - OTEL_SERVICE_NAME=corda-partyb
       - OTEL_EXPORTER=otlp_span                            # TODO confirm valid env var
       - OTEL_TRACES_EXPORTER=jaeger                        # default is oltp
