@@ -5,20 +5,20 @@ printf "************************************************************************
 printf "Create the Prometheus driver config\n"
 printf "*********************************************************************************\n"
 
-install -m 644 /dev/null ./mynetwork/shared/drivers/config.yml
-cat <<EOF >./mynetwork/shared/drivers/config.yml
+install -m 644 /dev/null ./mynetwork/shared/drivers/prom_jmx_exporter.yaml
+cat <<EOF >./mynetwork/shared/drivers/prom_jmx_exporter.yaml
 {}
 EOF
 
-printf "Created in: ./mynetwork/shared/drivers/config.yml\n\n"
+printf "Created in: ./mynetwork/shared/drivers/prom_jmx_exporter.yaml\n\n"
 
 # Create the Prometheus configuration
 printf "*********************************************************************************\n"
 printf "Create the Prometheus configuration\n"
 printf "*********************************************************************************\n"
 
-install -m 644 /dev/null ./mynetwork/prometheus/prometheus.yml
-cat <<EOF >./mynetwork/prometheus/prometheus.yml
+install -m 644 /dev/null ./mynetwork/prometheus/prometheus.yaml
+cat <<EOF >./mynetwork/prometheus/prometheus.yaml
 global:
   scrape_interval: 10s
   external_labels:
@@ -43,13 +43,9 @@ scrape_configs:
   - job_name: 'loki'
     static_configs:
     - targets: ['loki:3100']
-
-  - job_name: 'tempo'
-    static_configs:
-    - targets: ['tempo:3100']
 EOF
 
-printf "Created in: ./mynetwork/prometheus/prometheus.yml\n\n"
+printf "Created in: ./mynetwork/prometheus/prometheus.yaml\n\n"
 
 # Create the Promtail configuration
 printf "*********************************************************************************\n"
@@ -58,6 +54,8 @@ printf "************************************************************************
 
 install -m 644 /dev/null ./mynetwork/promtail/promtail-config.yaml
 cat <<EOF >./mynetwork/promtail/promtail-config.yaml
+# Reference @ https://grafana.com/docs/loki/latest/clients/promtail/
+
 server:
   http_listen_port: 9080
   grpc_listen_port: 0

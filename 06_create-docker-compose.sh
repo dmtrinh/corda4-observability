@@ -52,7 +52,7 @@ services:
       - ./shared/drivers:/opt/corda/drivers:ro
       - ./shared/network-parameters:/opt/corda/network-parameters:rw
     environment:
-      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml"
+      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/prom_jmx_exporter.yaml"
     depends_on:
       - notarydb
 
@@ -75,7 +75,7 @@ services:
       - ./shared/drivers:/opt/corda/drivers:ro
       - ./shared/network-parameters:/opt/corda/network-parameters:rw
     environment:
-      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml"
+      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/prom_jmx_exporter.yaml"
     depends_on:
       - partyadb
 
@@ -98,7 +98,7 @@ services:
       - ./shared/drivers:/opt/corda/drivers:ro
       - ./shared/network-parameters:/opt/corda/network-parameters:rw
     environment:
-      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/config.yml"
+      - "JVM_ARGS=-XX:+HeapDumpOnOutOfMemoryError -javaagent:/opt/corda/drivers/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/corda/drivers/prom_jmx_exporter.yaml"
     depends_on:
       - partybdb
 
@@ -109,9 +109,9 @@ services:
     ports:
       - 9090:9090
     command:
-      - --config.file=/etc/prometheus/prometheus.yml
+      - --config.file=/etc/prometheus/prometheus.yaml
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
 
   grafana:
     image: grafana/grafana:latest
@@ -136,7 +136,6 @@ services:
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
       - ./loki:/loki
-#      - ./loki/wal:/loki/wal
     command: -config.file=/etc/loki/local-config.yaml
 
   promtail:
