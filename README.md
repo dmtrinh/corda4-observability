@@ -277,7 +277,7 @@ You can find the `docker-compose.yml` file in `./mynetwork/docker-compose.yml`. 
   
 ```
 The stack you have configured so far looks like this:
-![Deployment Stack](/assets/corda-monitoring-stack.png)
+![Deployment Stack 1](/assets/demo_stack_1.png)
 
 At this point, you have two options:
 * Complete the rest of this step to instantiate your stack and then start [setting up your Grafana dashboard](#step-8-setup-grafana).  
@@ -349,6 +349,9 @@ docker compose -f mynetwork/docker-compose.yml -f mynetwork/docker-compose.trace
  ⠿ Container notary        Started                12.6s
  ⠿ Container partyb        Started                12.6s
 ```
+The stack you now have looks like this:
+![Deployment Stack 2](/assets/demo_stack_2.png)
+
 ## Step 8: Setup Grafana
 
 On your browser, go to [http://localhost:3000](http://localhost:3000).
