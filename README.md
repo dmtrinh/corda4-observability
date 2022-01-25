@@ -397,7 +397,7 @@ Click `Split` on the top right menu pane.
 SSH into the PartyA node Crash shell:
 
 ```bash
-➜ ssh user@localhost -p 2222
+➜ ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no user@localhost -p 2222
 ```
 
 When prompted, the password is `password`.
