@@ -24,17 +24,14 @@ global:
   external_labels:
     monitor: "corda-network"
 scrape_configs:
-  - job_name: "notary"
+  - job_name: "corda"
     static_configs:
       - targets: ["notary:8080"]
-    relabel_configs:
-      - source_labels: [__address__]
-        regex: "([^:]+):\\\d+"
-        target_label: node
-
-  - job_name: "nodes"
-    static_configs:
+        labels:
+          role: "notary"
       - targets: ["partya:8080", "partyb:8080"]
+        labels:
+          role: "participant"
     relabel_configs:
       - source_labels: [__address__]
         regex: "([^:]+):\\\d+"

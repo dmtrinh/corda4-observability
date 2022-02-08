@@ -371,7 +371,7 @@ At the bottom of the page, click on `Save & Test`.  You should see a green alert
 
 Hover over the `Dashboards` icon, and click `Manage`.
 
-Click `Import`, then `Upload .json file`, and navigate to the clone repository folder.  Inside the `grafana` folder, you will see a json file - `Grafana-Corda-Dashboard.json`, see [here](./grafana/Grafana-Corda-Dashboard.json).
+Click `Import`, then `Upload .json file`, and navigate to the clone repository folder.  Inside the `grafana` folder, you will see a json file - `Grafana-Corda-Network-Overview.json`, see [here](./grafana/Grafana-Corda-Network-Overview.json).
 
 On the following screen, click `Import`.
 
@@ -397,7 +397,7 @@ Click `Split` on the top right menu pane.
 SSH into the PartyA node Crash shell:
 
 ```bash
-➜ ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no user@localhost -p 2222
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no user@localhost -p 2222
 ```
 
 When prompted, the password is `password`.

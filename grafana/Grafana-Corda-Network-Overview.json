@@ -12,6 +12,7 @@
       }
     ]
   },
+  "description": "All Corda nodes should be scraped under one job_name: \"corda\"",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
@@ -93,7 +94,7 @@
       "pluginVersion": "6.6.0",
       "targets": [
         {
-          "expr": "up",
+          "expr": "up{job=\"corda\"}",
           "legendFormat": "{{ instance }}",
           "refId": "A"
         }
@@ -197,7 +198,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total[5m])*100",
+          "expr": "rate(process_cpu_seconds_total{job=\"corda\"}[5m])*100",
           "legendFormat": "{{ instance }}",
           "refId": "A"
         }
@@ -517,7 +518,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "net_corda_FlowDuration_Count{job=\"nodes\"}",
+          "expr": "net_corda_FlowDuration_Count{job=\"corda\"}",
           "legendFormat": "{{ instance }} - {{ name }}",
           "refId": "A"
         }
@@ -696,7 +697,7 @@
     ]
   },
   "timezone": "",
-  "title": "Corda",
-  "uid": "OcK8CTiGk",
-  "version": 21
+  "title": "Corda Network Overview",
+  "uid": "1cK8CTiGk",
+  "version": 1
 }

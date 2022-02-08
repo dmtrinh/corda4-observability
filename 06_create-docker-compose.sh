@@ -103,7 +103,7 @@ services:
       - partybdb
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.33.1
     container_name: prometheus
     hostname: prometheus
     ports:
@@ -114,7 +114,7 @@ services:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:8.3.4
     container_name: grafana
     hostname: grafana
     ports:
