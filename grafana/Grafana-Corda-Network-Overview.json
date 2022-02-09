@@ -18,11 +18,11 @@
       }
     ]
   },
-  "description": "All Corda nodes should be scraped under one job_name: \"corda\"",
+  "description": "All Corda nodes should have a label {group=\"corda\"}",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 5,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -98,8 +98,9 @@
       "pluginVersion": "8.3.4",
       "targets": [
         {
-          "expr": "up{job=\"corda\"}",
-          "legendFormat": "{{ instance }}",
+          "expr": "up{group=\"corda\"}",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -147,7 +148,8 @@
       "targets": [
         {
           "expr": "java_lang_Runtime_Uptime",
-          "legendFormat": "{{ instance }}",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -205,8 +207,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total{job=\"corda\"}[5m])*100",
-          "legendFormat": "{{ instance }}",
+          "expr": "rate(process_cpu_seconds_total{group=\"corda\"}[5m])*100",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -281,7 +284,8 @@
       "targets": [
         {
           "expr": "net_corda_Flows_Count{name=\"Finished\"}",
-          "legendFormat": "{{ instance }}",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -329,7 +333,8 @@
       "targets": [
         {
           "expr": "net_corda_Flows_Count{name=\"Started\"}",
-          "legendFormat": "{{ instance }}",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -384,7 +389,8 @@
       "targets": [
         {
           "expr": "java_lang_Memory_HeapMemoryUsage_used",
-          "legendFormat": "{{ instance }}",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -464,6 +470,8 @@
       "targets": [
         {
           "expr": "net_corda_FlowDuration_FiveMinuteRate{node=\"notary\"}",
+          "interval": "",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -517,8 +525,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "net_corda_FlowDuration_Count{job=\"corda\"}",
-          "legendFormat": "{{ instance }} - {{ name }}",
+          "expr": "net_corda_FlowDuration_Count{group=\"corda\"}",
+          "interval": "",
+          "legendFormat": "{{ node }} - {{ name }}",
           "refId": "A"
         }
       ],
@@ -600,7 +609,8 @@
         {
           "expr": "net_corda_Flows_Value{name=\"InFlight\"}",
           "instant": false,
-          "legendFormat": "{{ instance }}",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -652,7 +662,8 @@
       "targets": [
         {
           "expr": "rate(net_corda_Flows_Count{name=\"CheckpointVolumeBytesPerSecondHist\"}[5m])",
-          "legendFormat": "{{ instance }}",
+          "interval": "",
+          "legendFormat": "{{ node }}",
           "refId": "A"
         }
       ],
@@ -688,6 +699,6 @@
   "timezone": "",
   "title": "Corda Network Overview",
   "uid": "1cK8CTiGk",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }

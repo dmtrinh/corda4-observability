@@ -28,9 +28,11 @@ scrape_configs:
     static_configs:
       - targets: ["notary:8080"]
         labels:
+          group: "corda"
           role: "notary"
       - targets: ["partya:8080", "partyb:8080"]
         labels:
+          group: "corda"
           role: "participant"
     relabel_configs:
       - source_labels: [__address__]

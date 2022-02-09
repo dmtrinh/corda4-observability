@@ -76,17 +76,16 @@ global:
   external_labels:
     monitor: "corda-network"
 scrape_configs:
-  # - job_name: "notary"
+  # - job_name: "corda"
   #   static_configs:
   #     - targets: ["notary:8080"]
-  #   relabel_configs:
-  #     - source_labels: [__address__]
-  #       regex: "([^:]+):\\\d+"
-  #       target_label: node
-
-  # - job_name: "nodes"
-  #   static_configs:
+  #       labels:
+  #         role: "group"
+  #         role: "notary"
   #     - targets: ["partya:8080", "partyb:8080"]
+  #       labels:
+  #         role: "group"
+  #         role: "participant"
   #   relabel_configs:
   #     - source_labels: [__address__]
   #       regex: "([^:]+):\\\d+"
@@ -100,13 +99,13 @@ scrape_configs:
     static_configs:
     - targets: ['tempo:3200']
 
-  - job_name: 'corda_nodes'
+  - job_name: 'otelcollector'
     static_configs:
     - targets: ['otelcollector:9464']
-    relabel_configs:
-      - source_labels: [__address__]
-        regex: "([^:]+):\\\d+"
-        target_label: node
+    # relabel_configs:
+    #   - source_labels: [__address__]
+    #     regex: "([^:]+):\\\d+"
+    #     target_label: node
 EOF
 
 printf "Created in: ./mynetwork/prometheus/prometheus.yaml\n\n"
@@ -264,19 +263,31 @@ receivers:
       grpc:
       http:
 
-  # See https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/simpleprometheusreceiver
-  prometheus_simple/partya:
-    endpoint: "partya:8080"
-    tls_enabled: false
-    collection_interval: 10s
-  prometheus_simple/partyb:
-    endpoint: "partyb:8080"
-    tls_enabled: false
-    collection_interval: 10s
-  prometheus_simple/notary:
-    endpoint: "notary:8080"
-    tls_enabled: false
-    collection_interval: 10s
+  # Ref @ https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/simpleprometheusreceiver
+  # prometheus_simple/notary:
+  #   endpoint: "notary:8080"
+  #   tls_enabled: false
+  #   collection_interval: 10s
+
+  # Ref @ https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "corda"
+          scrape_interval: 5s
+          static_configs:
+            - targets: ["notary:8080"]
+              labels:
+                group: "corda"
+                role: "notary"
+            - targets: ["partya:8080", "partyb:8080"]
+              labels:
+                group: "corda"
+                role: "participant"
+          relabel_configs:
+            - source_labels: [__address__]
+              regex: "([^:]+):\\\d+"
+              target_label: node
 
   filelog/partya:
     include: [ /var/bootstrap/partya/logs/node-partya_json.log ]
@@ -317,6 +328,7 @@ exporters:
   # Exposes Prometheus metrics on port 9464.  Configure a job in Prometheus to
   # scrape this target, e.g. http://localhost:9464/metrics
   # See https://alanstorm.com/what-are-open-telemetry-metrics-and-exporters/
+  # Ref @ https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/prometheusexporter
   prometheus:
     endpoint: "0.0.0.0:9464"
 
@@ -376,16 +388,8 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp, file]
-    metrics/partya:
-      receivers: [prometheus_simple/partya]
-      processors: [batch]
-      exporters: [prometheus]
-    metrics/partyb:
-      receivers: [prometheus_simple/partyb]
-      processors: [batch]
-      exporters: [prometheus]
-    metrics/notary:
-      receivers: [prometheus_simple/notary]
+    metrics/corda:
+      receivers: [prometheus]
       processors: [batch]
       exporters: [prometheus]
     logs/partya:
@@ -449,7 +453,7 @@ storage:
   trace:
     backend: local                     # backend configuration to use
     wal:
-      path: /tmp/tempo/wal            # where to store the the wal locally
+      path: /tmp/tempo/wal             # where to store the the wal locally
       #bloom_filter_false_positive: .05 # bloom filter false positive rate.  lower values create larger filters but fewer false positives
       #index_downsample: 10             # number of traces per index record
     local:
@@ -460,19 +464,6 @@ storage:
 EOF
 
 printf "Created in: ./mynetwork/tempo/tempo-local.yaml\n\n"
-
-# Create the Grafana Tempo Query configuration
-# printf "*********************************************************************************\n"
-# printf "Create the Grafana Tempo Query configuration\n"
-# printf "*********************************************************************************\n\n"
-
-# install -m 644 /dev/null ./mynetwork/tempo/tempo-query.yaml
-# cat <<EOF >./mynetwork/tempo/tempo-query.yaml
-# backend: "tempo:3100"
-# #backend: "tempo:3102"
-# EOF
-
-# printf "Created in: ./mynetwork/tempo/tempo-query.yaml\n\n"
 
 # Create Docker-Compose File
 printf "*********************************************************************************\n"
@@ -617,7 +608,7 @@ EOF
 
 printf "Created in: ./mynetwork/docker-compose.trace.yml\n"
 
-printf "Run command: docker compose -f ./mynetwork/docker-compose.trace.yml up -d\n\n"
+printf "Run command: docker-compose -f ./mynetwork/docker-compose.trace.yml up -d\n\n"
 
 printf "*********************************************************************************\n"
 printf "COMPLETE\n"
