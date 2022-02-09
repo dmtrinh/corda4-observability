@@ -6,9 +6,9 @@ The architecture is built on some of the most popular open source projects today
 | --- | --- |
 | OpenTelemetry Instrumentation for Java | [1.10](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases) |
 | Prometheus JMX exporter | [0.16.1](https://github.com/prometheus/jmx_exporter/releases) |
-| Prometheus | [2.32.1](https://github.com/prometheus/prometheus/releases) |
+| Prometheus | [2.33.1](https://github.com/prometheus/prometheus/releases) |
 | Grafana Loki and Promtail | [2.4.2](https://github.com/grafana/loki/releases) |
-| Grafana | [8.3.3](https://grafana.com/grafana/download) |
+| Grafana | [8.3.4](https://grafana.com/grafana/download) |
 
 - [Step 01: Prepare the workspace directory](#step-1-prepare-the-workspace-directory)
 - [Step 02: Create node configuration files](#step-2-create-node-configuration-files)
@@ -28,16 +28,16 @@ The architecture is built on some of the most popular open source projects today
 
 We will create the directory structure and download the necessary from [R3's Artifactory](https://software.r3.com/artifactory/corda-releases/net/corda/):
 
-- corda-tools-network-bootstrapper-4.8.5.jar
-- corda-finance-contracts-4.8.5.jar
-- corda-finance-workflows-4.8.5.jar
+- corda-tools-network-bootstrapper-4.8.6.jar
+- corda-finance-contracts-4.8.6.jar
+- corda-finance-workflows-4.8.6.jar
 
 The two `corda-finance-*.jar`'s make up the Corda Finance CordApp which we will use to test transactions across peer nodes.
 
 Execute the **`01_setup-directory.sh`** shell script:
 
 ```bash
-➜ ./01_setup-directory.sh
+./01_setup-directory.sh
 ```
 
 You should see a new directory called `mynetwork` created, with a few sub directories and the required jars.
@@ -45,7 +45,7 @@ You should see a new directory called `mynetwork` created, with a few sub direct
 ```bash
 ➜  tree mynetwork
 mynetwork
-├── corda-tools-network-bootstrapper-4.8.5.jar
+├── corda-tools-network-bootstrapper-4.8.6.jar
 ├── grafana
 ├── loki
 ├── prometheus
@@ -53,8 +53,8 @@ mynetwork
 └── shared
     ├── additional-node-infos
     └── cordapps
-        ├── corda-finance-contracts-4.8.5.jar
-        └── corda-finance-workflows-4.8.5.jar
+        ├── corda-finance-contracts-4.8.6.jar
+        └── corda-finance-workflows-4.8.6.jar
     └── drivers
         ├── jmx_prometheus_javaagent-0.16.1.jar
         └── postgresql-42.3.1.jar
@@ -71,7 +71,7 @@ We will require 4 node configurations:
 Execute the **`02_create-node-configurations.sh`** shell script:
 
 ```bash
-➜ ./02_create-node-configurations.sh
+./02_create-node-configurations.sh
 ```
 
 Our `mynetwork` directory now looks like the following:
@@ -79,7 +79,7 @@ Our `mynetwork` directory now looks like the following:
 ```bash
 ➜  tree mynetwork
 mynetwork
-├── corda-tools-network-bootstrapper-4.8.5.jar
+├── corda-tools-network-bootstrapper-4.8.6.jar
 ├── grafana
 ├── loki
 ├── notary_node.conf
@@ -90,8 +90,8 @@ mynetwork
 └── shared
     ├── additional-node-infos
     └── cordapps
-        ├── corda-finance-contracts-4.8.5.jar
-        └── corda-finance-workflows-4.8.5.jar
+        ├── corda-finance-contracts-4.8.6.jar
+        └── corda-finance-workflows-4.8.6.jar
     └── drivers
         ├── jmx_prometheus_javaagent-0.16.1.jar
         └── postgresql-42.3.1.jar
@@ -139,14 +139,15 @@ The [Corda Network Bootstrapper](https://docs.corda.net/docs/corda-os/4.8/networ
 Execute the **`03_run-corda-network-bootstrapper.sh`** shell script:
 
 ```bash
-➜ ./03_run-corda-network-bootstrapper.sh
-
+./03_run-corda-network-bootstrapper.sh
+```
+```
 Bootstrapping local test network in /corda-observability/mynetwork
 Generating node directory for partya
 Generating node directory for notary
 Generating node directory for partyb
 Nodes found in the following sub-directories: [notary, partya, partyb]
-Found the following CorDapps: [corda-finance-workflows-4.8.5.jar, corda-finance-contracts-4.8.5.jar]
+Found the following CorDapps: [corda-finance-workflows-4.8.6.jar, corda-finance-contracts-4.8.6.jar]
 Copying CorDapp JARs into node directories
 Waiting for all nodes to generate their node-info files...
 Distributing all node-info files to all nodes
@@ -178,7 +179,7 @@ There are some common files that are shared between the peer nodes.  Let's put t
 Execute the **`04_copy-common-files.sh`** shell script:
 
 ```bash
-➜ ./04_copy-common-files.sh
+./04_copy-common-files.sh
 ```
 
 This will copy across common files to the `./mynetwork/shared` folder.
@@ -188,7 +189,7 @@ This will copy across common files to the `./mynetwork/shared` folder.
 Execute the **`05_create-monitoring-configurations.sh`** shell script:
 
 ```bash
-➜ ./05_create-monitoring-configurations.sh
+./05_create-monitoring-configurations.sh
 ```
 
 This creates a config file in `./mynetwork/prometheus/prometheus.yml`:
@@ -226,7 +227,7 @@ We need a `docker-compose.yml` file which allows us to bring up all the services
 Execute the **`06_create-docker-compose-file.sh`** shell script:
 
 ```bash
-➜ ./06_create-docker-compose.sh
+./06_create-docker-compose.sh
 ```
 
 You can find the `docker-compose.yml` file in `./mynetwork/docker-compose.yml`. Inside the file, you have created services for each node database, along with Prometheus, Grafana, Promtail and Loki:
@@ -307,9 +308,9 @@ View running containers:
 ```bash
 ==> docker ps -a
 CONTAINER ID   IMAGE                                    COMMAND                  CREATED              STATUS              PORTS                                                                    NAMES
-c4b67d8e786a   corda/corda-zulu-java1.8-4.8.5:RELEASE   "bash -c 'java -jar …"   About a minute ago   Up About a minute   10200/tcp, 10202/tcp, 0.0.0.0:10002->10201/tcp                           notary
-2e64af7ceab5   corda/corda-zulu-java1.8-4.8.5:RELEASE   "bash -c 'java -jar …"   About a minute ago   Up About a minute   10200/tcp, 10202/tcp, 0.0.0.0:3333->2222/tcp, 0.0.0.0:10008->10201/tcp   partyb
-6da0d4dfe6fe   corda/corda-zulu-java1.8-4.8.5:RELEASE   "bash -c 'java -jar …"   About a minute ago   Up About a minute   10200/tcp, 0.0.0.0:2222->2222/tcp, 10202/tcp, 0.0.0.0:10005->10201/tcp   partya
+c4b67d8e786a   corda/corda-zulu-java1.8-4.8.6:RELEASE   "bash -c 'java -jar …"   About a minute ago   Up About a minute   10200/tcp, 10202/tcp, 0.0.0.0:10002->10201/tcp                           notary
+2e64af7ceab5   corda/corda-zulu-java1.8-4.8.6:RELEASE   "bash -c 'java -jar …"   About a minute ago   Up About a minute   10200/tcp, 10202/tcp, 0.0.0.0:3333->2222/tcp, 0.0.0.0:10008->10201/tcp   partyb
+6da0d4dfe6fe   corda/corda-zulu-java1.8-4.8.6:RELEASE   "bash -c 'java -jar …"   About a minute ago   Up About a minute   10200/tcp, 0.0.0.0:2222->2222/tcp, 10202/tcp, 0.0.0.0:10005->10201/tcp   partya
 1ba72c28f0b5   postgres:latest                          "docker-entrypoint.s…"   About a minute ago   Up About a minute   5432/tcp                                                                 notarydb
 328b3c7d8fd1   grafana/loki:2.4.2                       "/usr/bin/loki -conf…"   About a minute ago   Up About a minute   0.0.0.0:3100->3100/tcp                                                   loki
 86d80c570772   prom/prometheus:latest                   "/bin/prometheus --c…"   About a minute ago   Up About a minute   0.0.0.0:9090->9090/tcp                                                   prometheus
@@ -324,7 +325,7 @@ dc43c05edd0e   grafana/grafana:latest                   "/run.sh"               
 Execute the **`07_add-trace.sh`** shell script:
 
 ```bash
-➜ ./07_add-trace.sh
+./07_add-trace.sh
 ```
 
 Start up the services using the following command:

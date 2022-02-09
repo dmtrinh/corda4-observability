@@ -13,9 +13,9 @@ mkdir {mynetwork/tempo,mynetwork/tempo/tempo-data}
 printf "*********************************************************************************\n"
 printf "Download auxiliary Corda tools \n"
 printf "*********************************************************************************\n"
-wget -N --https-only --progress=bar -N --continue -P ./mynetwork/shared/tools https://software.r3.com/artifactory/corda-releases/net/corda/corda-tools-explorer/4.8.5/corda-tools-explorer-4.8.5.jar
-wget -N --https-only --progress=bar -N --continue -P ./mynetwork/shared/tools https://software.r3.com:443/artifactory/corda/net/corda/corda-tools-blob-inspector/4.8.5/corda-tools-blob-inspector-4.8.5.jar
-wget -N --https-only --progress=bar -N --continue -P ./mynetwork/shared/tools https://software.r3.com:443/artifactory/corda-releases/net/corda/corda-tools-checkpoint-agent/4.8.5/corda-tools-checkpoint-agent-4.8.5.jar
+wget -N --https-only --progress=bar -N --continue -P ./mynetwork/shared/tools https://software.r3.com/artifactory/corda-releases/net/corda/corda-tools-explorer/4.8.6/corda-tools-explorer-4.8.6.jar
+wget -N --https-only --progress=bar -N --continue -P ./mynetwork/shared/tools https://software.r3.com:443/artifactory/corda/net/corda/corda-tools-blob-inspector/4.8.6/corda-tools-blob-inspector-4.8.6.jar
+wget -N --https-only --progress=bar -N --continue -P ./mynetwork/shared/tools https://software.r3.com:443/artifactory/corda-releases/net/corda/corda-tools-checkpoint-agent/4.8.6/corda-tools-checkpoint-agent-4.8.6.jar
 
 # Download OpenTelemetry Instrumentation for Java driver
 printf "*********************************************************************************\n"

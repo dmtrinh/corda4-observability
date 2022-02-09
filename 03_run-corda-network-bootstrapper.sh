@@ -5,7 +5,7 @@ printf "************************************************************************
 printf "Run Corda Network Bootstrapper\n"
 printf "*********************************************************************************\n\n"
 
-java -jar ./mynetwork/corda-tools-network-bootstrapper-4.8.5.jar --dir=./mynetwork
+java -jar ./mynetwork/corda-tools-network-bootstrapper-4.8.6.jar --dir=./mynetwork
 
 printf "*********************************************************************************\n"
 printf "COMPLETE\n"

@@ -36,7 +36,7 @@ services:
       POSTGRES_PASSWORD: test
 
   notary:
-    image: corda/corda-zulu-java1.8-4.8.5:RELEASE
+    image: corda/corda-zulu-java1.8-4.8.6:RELEASE
     container_name: notary
     hostname: notary
     ports:
@@ -57,7 +57,7 @@ services:
       - notarydb
 
   partya:
-    image: corda/corda-zulu-java1.8-4.8.5:RELEASE
+    image: corda/corda-zulu-java1.8-4.8.6:RELEASE
     container_name: partya
     hostname: partya
     ports:
@@ -80,7 +80,7 @@ services:
       - partyadb
 
   partyb:
-    image: corda/corda-zulu-java1.8-4.8.5:RELEASE
+    image: corda/corda-zulu-java1.8-4.8.6:RELEASE
     container_name: partyb
     hostname: partyb
     ports:

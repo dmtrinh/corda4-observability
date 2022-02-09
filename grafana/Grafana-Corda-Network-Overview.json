@@ -468,7 +468,7 @@
       "pluginVersion": "6.6.0",
       "targets": [
         {
-          "expr": "net_corda_FlowDuration_FiveMinuteRate{instance=\"notary\"}",
+          "expr": "net_corda_FlowDuration_FiveMinuteRate{node=\"notary\"}",
           "refId": "A"
         }
       ],
