@@ -8,7 +8,7 @@ The architecture is built on some of the most popular open source projects today
 | Prometheus JMX exporter | [0.16.1](https://github.com/prometheus/jmx_exporter/releases) |
 | Prometheus | [2.33.1](https://github.com/prometheus/prometheus/releases) |
 | Grafana Loki and Promtail | [2.4.2](https://github.com/grafana/loki/releases) |
-| Grafana | [8.3.4](https://grafana.com/grafana/download) |
+| Grafana | [8.3.5](https://grafana.com/grafana/download) |
 
 - [Step 01: Prepare the workspace directory](#step-1-prepare-the-workspace-directory)
 - [Step 02: Create node configuration files](#step-2-create-node-configuration-files)

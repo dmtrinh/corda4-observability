@@ -114,7 +114,7 @@ services:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
 
   grafana:
-    image: grafana/grafana:8.3.4
+    image: grafana/grafana:8.3.5
     container_name: grafana
     hostname: grafana
     ports:
